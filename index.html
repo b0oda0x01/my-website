@@ -3,19 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <title>Meta Open Redirect PoC</title>
-<script>
-window.onload = function () {
-    // لو الزيارة دي أول مرة، نعمل Redirect
-    if (!sessionStorage.getItem('redirected')) {
-        sessionStorage.setItem('redirected', 'true');
-        window.location.href = "https://facebook.com/a";
-    }
-};
-</script>
 <style>
     body {
         margin: 0;
         padding: 0;
+        background: #f0f2f5;
+        font-family: Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        flex-direction: column;
+    }
+    .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #1877f2;
+        font-size: 18px;
+    }
+    .dot {
+        width: 8px;
+        height: 8px;
+        background: #1877f2;
+        border-radius: 50%;
+        animation: blink 1.2s infinite ease-in-out;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+        0%, 80%, 100% { opacity: 0; }
+        40% { opacity: 1; }
     }
     iframe {
         width: 100vw;
@@ -23,9 +42,26 @@ window.onload = function () {
         border: none;
     }
 </style>
+<script>
+window.onload = function () {
+    if (!sessionStorage.getItem('redirected')) {
+        sessionStorage.setItem('redirected', 'true');
+        setTimeout(function(){
+            window.location.href = "https://facebook.com/a";
+        }, 1500); // تأخير قبل التحويل
+    } else {
+        // عرض واجهة فيسبوك بعد الرجوع
+        document.body.innerHTML = '<iframe src="https://facebook.com/a"></iframe>';
+    }
+};
+</script>
 </head>
 <body>
-    <!-- واجهة الفيسبوك جوه iframe -->
-    <iframe src="https://facebook.com/a"></iframe>
+    <div class="loading">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        Loading Facebook...
+    </div>
 </body>
 </html>
