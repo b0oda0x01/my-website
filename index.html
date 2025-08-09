@@ -1,61 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Meta Open Redirect PoC</title>
+<title>Fake Facebook</title>
 <style>
-    body { margin: 0; padding: 0; background: #f0f2f5; font-family: Arial, sans-serif; }
-    .loading { display: flex; align-items: center; justify-content: center; gap: 8px; color: #1877f2; font-size: 18px; height: 100vh; }
-    .dot { width: 8px; height: 8px; background: #1877f2; border-radius: 50%; animation: blink 1.2s infinite ease-in-out; }
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
-    .container { display: flex; justify-content: center; align-items: center; height: 100vh; }
-    .login-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 2px 8px rgba(0,0,0,0.1); width: 320px; }
-    .logo { text-align: center; font-size: 36px; color: #1877f2; font-weight: bold; margin-bottom: 20px; }
-    input { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-    .login-btn, .create-btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
-    .login-btn { background: #1877f2; color: white; }
-    .create-btn { background: #42b72a; color: white; margin-top: 10px; }
+  body { margin:0; font-family:sans-serif; }
+  .loading { display:flex; justify-content:center; align-items:center; height:100vh; background:#f0f2f5; font-size:24px; }
+  .login { display:none; padding:20px; background:#fff; max-width:400px; margin:40px auto; border:1px solid #ccc; border-radius:6px; }
+  .login h2 { text-align:center; }
 </style>
-<script>
-function showFakeFacebook() {
-    document.body.innerHTML = `
-        <div class="container">
-            <div class="login-box">
-                <div class="logo">facebook</div>
-                <input type="text" placeholder="Email address or phone number">
-                <input type="password" placeholder="Password">
-                <button class="login-btn">Log in</button>
-                <button class="create-btn">Create new account</button>
-            </div>
-        </div>
-    `;
-}
-
-// أول ما الصفحة تتفتح، قبل حتى ما يكتمل التحميل
-if (sessionStorage.getItem('redirected')) {
-    // عرض صفحة الفيس المزيف مباشرة
-    document.addEventListener("DOMContentLoaded", showFakeFacebook);
-} else {
-    // أول مرة → Loading ثم Redirect
-    document.addEventListener("DOMContentLoaded", function() {
-        document.body.innerHTML = `
-            <div class="loading">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-                Loading Facebook...
-            </div>
-        `;
-        sessionStorage.setItem('redirected', 'true');
-        setTimeout(function(){
-            window.location.href = "https://facebook.com/a";
-        }, 1500);
-    });
-}
-</script>
 </head>
 <body>
+
+<div id="loading" class="loading">Loading...</div>
+
+<div id="login" class="login">
+  <h2>Facebook</h2>
+  <form>
+    <input type="text" placeholder="Email or Phone" style="width:100%;margin-bottom:10px;padding:8px;"><br>
+    <input type="password" placeholder="Password" style="width:100%;margin-bottom:10px;padding:8px;"><br>
+    <button type="submit" style="width:100%;padding:10px;background:#1877f2;color:#fff;border:none;border-radius:4px;">Log In</button>
+  </form>
+</div>
+
+<script>
+  function showLogin() {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('login').style.display = 'block';
+  }
+
+  // هنشغل الـ loading سواء كانت أول مرة أو رجوع
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('login').style.display = 'none';
+
+  setTimeout(() => {
+    showLogin();
+    sessionStorage.setItem('visited', 'yes');
+  }, 1500);
+</script>
+
 </body>
 </html>
