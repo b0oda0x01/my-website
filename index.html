@@ -1,70 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Hacker Matrix</title>
-  <style>
+<meta charset="UTF-8">
+<title>Meta Open Redirect PoC</title>
+<script>
+window.onload = function () {
+    // لو الزيارة دي أول مرة، نعمل Redirect
+    if (!sessionStorage.getItem('redirected')) {
+        sessionStorage.setItem('redirected', 'true');
+        window.location.href = "https://facebook.com/a";
+    }
+};
+</script>
+<style>
     body {
-      margin: 0;
-      overflow: hidden;
-      background: black;
+        margin: 0;
+        padding: 0;
     }
-    canvas {
-      display: block;
+    iframe {
+        width: 100vw;
+        height: 100vh;
+        border: none;
     }
-  </style>
+</style>
 </head>
 <body>
-<canvas id="matrix"></canvas>
-
-<script>
-  // Setup canvas
-  const canvas = document.getElementById('matrix');
-  const ctx = canvas.getContext('2d');
-
-  canvas.height = window.innerHeight;
-  canvas.width = window.innerWidth;
-
-  // Characters
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
-  const lettersArray = letters.split("");
-
-  const fontSize = 16;
-  const columns = canvas.width / fontSize;
-
-  // Array to store drops
-  const drops = [];
-  for (let x = 0; x < columns; x++) {
-    drops[x] = 1;
-  }
-
-  // Draw function
-  function draw() {
-    // Black BG with opacity to create trail
-    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#0F0"; // Green text
-    ctx.font = fontSize + "px monospace";
-
-    for (let i = 0; i < drops.length; i++) {
-      // First row special text
-      if (drops[i] === 1 && Math.random() < 0.01) {
-        ctx.fillText("Hello b0oda", i * fontSize, drops[i] * fontSize);
-      } else {
-        const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-      }
-
-      // Move drop down or reset
-      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-        drops[i] = 0;
-      }
-      drops[i]++;
-    }
-  }
-
-  setInterval(draw, 33);
-</script>
+    <!-- واجهة الفيسبوك جوه iframe -->
+    <iframe src="https://facebook.com/a"></iframe>
 </body>
 </html>
