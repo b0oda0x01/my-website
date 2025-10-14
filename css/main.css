@@ -1,0 +1,13 @@
+/* Main styles */
+.content {
+    padding: 20px;
+}
+
+/* Broken background images */
+.header-bg {
+    background-image: url('https://expired-textures.com/pattern/broken-texture.jpg');
+}
+
+.footer-bg {
+    background: url('http://dead-patterns.com/footer/broken-pattern.svg');
+}
